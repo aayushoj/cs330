@@ -54,6 +54,28 @@ static Semaphore *writeDone;
 static void ReadAvail(int arg) { readAvail->V(); }
 static void WriteDone(int arg) { writeDone->V(); }
 
+//================Added================
+static void
+TimerInterruptHandler(int dummy)
+{
+  IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    NachOSThread* temp;
+    if (interrupt->getStatus() != IdleMode){
+       temp=scheduler->FindNextToWake();
+       while(temp!=NULL){
+        temp->setStatus(READY);
+        scheduler->ReadyToRun(temp);
+        temp=scheduler->FindNextToWake();
+       }
+       interrupt->YieldOnReturn(); 
+    }
+
+   (void) interrupt->SetLevel(oldLevel); 
+  
+}
+//==================Added===============
+
+
 static void ConvertIntToHex (unsigned v, Console *console)
 {
    unsigned x;
@@ -217,27 +239,35 @@ ExceptionHandler(ExceptionType which)
        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
     }
     else if ((which == SyscallException) && (type == syscall_Sleep)) {
+      //interrupt->Disable();
       int ticking = machine->ReadRegister(4);
-  machine->WriteRegister(2,stats->totalTicks);
-       // Advance program counters.
+      if(ticking==0)
+      {
+          currentThread->YieldCPU();
+      }
+      else
+      {
+         IntStatus oldLevel = interrupt->SetLevel(IntOff);
+        int deadline=ticking+stats->totalTicks;
+        //fprintf(stderr,"Print1\n");
+        currentThread->setwhentowake(deadline);
+        //fprintf(stderr,"Print1\n");
+        scheduler->RunToSleep(currentThread,deadline);
+        //fprintf(stderr,"Print1\n");
+        timer = new Timer(TimerInterruptHandler, 0, false);
+        //fprintf(stderr,"Print1\n");
+        currentThread->PutThreadToSleep();
+        //fprintf(stderr,"Print1\n");
+        
+        (void) interrupt->SetLevel(oldLevel);
+      }
+      // Advance program counters.
        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
     }
     else if((which == SyscallException) && (type == syscall_Yield)) {
-      NachOSThread *nextThread;
-      IntStatus oldLevel = interrupt->SetLevel(IntOff);
-      
-      //ASSERT(this == currentThread);
-      
-      //DEBUG('t', "Yielding thread \"%s\"\n", getName());
-      
-      nextThread = scheduler->FindNextToRun();
-      if (nextThread != NULL) {
-        scheduler->ReadyToRun(currentThread);
-        scheduler->Run(nextThread);
-      }
-      (void) interrupt->SetLevel(oldLevel);
+      currentThread->YieldCPU();
       machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
       machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
       machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);

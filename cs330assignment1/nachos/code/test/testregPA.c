@@ -4,7 +4,16 @@ int
 main()
 {
     int array[SIZE], i, sum=0;
+    //==========just for check remove it ==================
+    system_PrintString("checking sleep ");
+    system_PrintInt(system_GetTime());
+    system_Sleep(1000);
+    system_PrintInt(system_GetTime());
 
+
+
+
+    //==========just for check remove it ==================
     system_PrintString("Starting physical address of array: ");
     system_PrintInt(system_GetPA((unsigned)array));
     system_PrintChar('\n');

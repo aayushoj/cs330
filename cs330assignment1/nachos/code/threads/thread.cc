@@ -49,6 +49,7 @@ NachOSThread::NachOSThread(char* threadName)
     space = NULL;
 #endif
 }
+//================ADDED================================================
 int
 NachOSThread::getpid()
 {
@@ -60,6 +61,24 @@ NachOSThread::getppid()
 {
 	return ppid;
 }
+
+int
+NachOSThread::getwhentowake()
+{
+    return whenToWake;
+}
+
+void
+NachOSThread::setwhentowake(int deadline)
+{
+     whenToWake=deadline;
+}
+
+//================ADDED================================================
+
+
+
+
 //----------------------------------------------------------------------
 // NachOSThread::~NachOSThread
 // 	De-allocate a thread.

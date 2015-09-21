@@ -61,8 +61,10 @@ extern void Cleanup();
 static void
 TimerInterruptHandler(int dummy)
 {
-    if (interrupt->getStatus() != IdleMode)
-	interrupt->YieldOnReturn();
+    if (interrupt->getStatus() != IdleMode){
+       interrupt->YieldOnReturn(); 
+    }
+	
 }
 
 //----------------------------------------------------------------------

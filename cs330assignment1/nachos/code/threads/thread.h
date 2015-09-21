@@ -98,9 +98,9 @@ class NachOSThread {
     
     void CheckOverflow();   			// Check if thread has 
 						// overflowed its stack
-    void setStatus(ThreadStatus st) { status = st; }
-    char* getName() { return (name); }
-    void Print() { printf("%s, ", name); }
+    void setStatus(ThreadStatus st) { status = st; } 
+    char* getName() { return (name); }               
+    void Print() { printf("%s, ", name); }           
 
   private:
     // some of the private data for this class is listed above
@@ -115,7 +115,8 @@ class NachOSThread {
     					// Allocate a stack for thread.
 					// Used internally by ThreadFork()
 
-    int pid, ppid;			// My pid and my parent's pid
+    int pid, ppid;			// My pid and my parent's pid (Added)
+    int whenToWake;         // Added for saving deadline to wake threads
 
 #ifdef USER_PROGRAM
 // A thread running a user program actually has *two* sets of CPU registers -- 
@@ -125,8 +126,10 @@ class NachOSThread {
     int userRegisters[NumTotalRegs];	// user-level CPU register state
 
   public:
-    int getpid();
-    int getppid();
+    int getpid();               //Added
+    int getppid();              //Added
+    int getwhentowake();        //Added
+    void setwhentowake(int);       //Added
     void SaveUserState();		// save user-level register state
     void RestoreUserState();		// restore user-level register state
 

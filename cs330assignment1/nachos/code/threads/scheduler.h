@@ -23,6 +23,9 @@ class Scheduler {
     ~Scheduler();			// De-allocate ready list
 
     void ReadyToRun(NachOSThread* thread);	// Thread can be dispatched.
+    void RunToSleep(NachOSThread* thread, int deadline);  // Added - add thread to sleep list
+    NachOSThread* FindNextToWake();         // Added - deque the first thread in
+                                            // the sorted list
     NachOSThread* FindNextToRun();		// Dequeue first thread on the ready 
 					// list, if any, and return thread.
     void Run(NachOSThread* nextThread);	// Cause nextThread to start running
@@ -31,6 +34,7 @@ class Scheduler {
   private:
     List *readyList;  		// queue of threads that are ready to run,
 				// but not running
+    List *sleepList;    //Added- list of threads that are sleeping 
 };
 
 #endif // SCHEDULER_H

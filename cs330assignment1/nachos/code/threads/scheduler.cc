@@ -30,6 +30,7 @@
 Scheduler::Scheduler()
 { 
     readyList = new List; 
+    sleepList = new List;
 } 
 
 //----------------------------------------------------------------------
@@ -40,6 +41,7 @@ Scheduler::Scheduler()
 Scheduler::~Scheduler()
 { 
     delete readyList; 
+    delete sleepList; 
 } 
 
 //----------------------------------------------------------------------
@@ -58,6 +60,17 @@ Scheduler::ReadyToRun (NachOSThread *thread)
     thread->setStatus(READY);
     readyList->Append((void *)thread);
 }
+//Adding new function===================================================
+void
+Scheduler::RunToSleep (NachOSThread *thread, int deadline)
+{
+    DEBUG('t', "Putting thread %s to Sleep.\n", thread->getName());
+
+    thread->setStatus(BLOCKED);
+    sleepList->SortedInsert((void *)thread, deadline);
+}
+
+
 
 //----------------------------------------------------------------------
 // Scheduler::FindNextToRun
@@ -72,6 +85,19 @@ Scheduler::FindNextToRun ()
 {
     return (NachOSThread *)readyList->Remove();
 }
+//Added new function====================================================
+NachOSThread* 
+Scheduler::FindNextToWake()
+{
+    NachOSThread* temp = (NachOSThread *)sleepList->Remove();
+    if(temp==NULL) return NULL;
+    if(stats->totalTicks < temp->getwhentowake()){
+     sleepList->SortedInsert((void *)temp, temp->getwhentowake());
+     return NULL;
+    }
+    else return temp;
+}
+
 
 //----------------------------------------------------------------------
 // Scheduler::Run
