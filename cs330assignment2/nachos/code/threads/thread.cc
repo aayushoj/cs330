@@ -39,17 +39,19 @@ NachOSThread::NachOSThread(char* threadName)
     name = threadName;
     stackTop = NULL;
     stack = NULL;
-    status = JUST_CREATED;
+    //status = JUST_CREATED;
+    setStatus(JUST_CREATED);
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
-    CPUBurst=0;
-    CPUsage=0;
-    S=1;
+    
     initialTime=stats->totalTicks;
     threadArray[thread_index] = this;
     pid = thread_index;
     thread_index++;
+    CPUBurst[pid]=0;
+    CPUsage[pid]=0;
+    S[pid]=1;
     ASSERT(thread_index < MAX_THREAD_COUNT);
     if (currentThread != NULL) {
        ppid = currentThread->GetPID();
@@ -189,8 +191,13 @@ NachOSThread::setStatus(ThreadStatus st)
     {
         if(st!=RUNNING)
         {
-            CPUBurst=stats->totalTicks-initialTime;
-            CPUsage+=CPUBurst;
+            CPUBurst[pid]=stats->totalTicks-initialTime;
+            if(pid==1)
+            {
+              sumBurst+=CPUBurst[pid];
+              coBurst++;
+              printf("Ave burst= %d == %d %d \n", sumBurst/coBurst,sumBurst, coBurst);
+            }
         }
     }
     status = st;
@@ -241,7 +248,8 @@ NachOSThread::Exit (bool terminateSim, int exitcode)
 
     NachOSThread *nextThread;
 
-    status = BLOCKED;
+    //status = BLOCKED;
+    setStatus(BLOCKED);
 
     // Set exit code in parent's structure provided the parent hasn't exited
     if (ppid != -1) {
@@ -329,7 +337,8 @@ NachOSThread::PutThreadToSleep ()
     
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
 
-    status = BLOCKED;
+   // status = BLOCKED;
+    setStatus(BLOCKED);
     while ((nextThread = scheduler->FindNextToRun()) == NULL)
 	interrupt->Idle();	// no one to run, wait for an interrupt
         
@@ -463,17 +472,9 @@ NachOSThread::CheckIfChild (int childpid)
 }
 
 void
-NachOSThread::UpdatePriority()
-{
-    CPUsage=CPUsage+CPUBurst;
-    CPUBurst=0;
-    CPUsage=CPUsage/2;
-    priority=basePriority+CPUsage/2;
-}
-void
 NachOSThread::UpdateS()
 {
-  S=(S+CPUBurst)/2;
+  S[pid]=(S[pid]+CPUBurst[pid])/2;
 }
 
 //----------------------------------------------------------------------

@@ -37,6 +37,17 @@ extern unsigned thread_index;                  // Index into this array (also us
 extern bool initializedConsoleSemaphores;       // Used to initialize the semaphores for console I/O exactly once
 extern bool exitThreadArray[];          // Marks exited threads
 extern int SchedType;
+extern int CPUsage[MAX_THREAD_COUNT];
+extern int CPUBurst[MAX_THREAD_COUNT];
+extern int Priority[MAX_THREAD_COUNT];
+extern int S[MAX_THREAD_COUNT];
+extern int basePriority[MAX_THREAD_COUNT];
+extern void UpdatePriority();
+extern int GetPriority (NachOSThread* t);
+extern int GetS(NachOSThread* t);
+extern void SetPriority(int p,int pid);
+extern int sumBurst;
+extern int coBurst; 
 
 class TimeSortedWaitQueue {             // Needed to implement syscall_Sleep
 private:

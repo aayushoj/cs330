@@ -62,8 +62,9 @@ Scheduler::ReadyToRun (NachOSThread *thread)
     }
     else if(SchedType==2)
     {
-        thread->UpdateS();
-        readyList->SortedInsert((void *)thread,thread->GetS());
+        //thread->UpdateS();
+        S[thread->GetPID()]=(S[thread->GetPID()]+CPUBurst[thread->GetPID()])/2;
+        readyList->SortedInsert((void *)thread,S[thread->GetPID()]);
     }
     else if(SchedType==3)
     {
@@ -71,7 +72,7 @@ Scheduler::ReadyToRun (NachOSThread *thread)
     }
     else if(SchedType==4)
     {
-        //printf("Entered in ready to run\n");
+        /*//printf("Entered in ready to run\n");
         List *tempList=new List;
         while(!(readyList->IsEmpty()))
         { 
@@ -79,16 +80,16 @@ Scheduler::ReadyToRun (NachOSThread *thread)
             temp->UpdatePriority();
             tempList->Append((void*)temp);
         }
-       // printf("Midway in ready to run\n");
+        // printf("Midway in ready to run\n");
         //printf("temp list contents:\n");
-   // tempList->Mapcar((VoidFunctionPtr) ThreadPrint);
+        // tempList->Mapcar((VoidFunctionPtr) ThreadPrint);
         while(!(tempList->IsEmpty()))
         {
             NachOSThread* temp = (NachOSThread *)tempList->Remove();
             readyList->SortedInsert((void*)temp,temp->GetPriority());   
         }
-        thread->UpdatePriority();
-        readyList->SortedInsert((void*)thread,thread->GetPriority());
+        thread->UpdatePriority();*/
+        readyList->SortedInsert((void*)thread,GetPriority(thread));
         //printf("Exiting in ready to run\n");
     }
 }
@@ -104,7 +105,30 @@ Scheduler::ReadyToRun (NachOSThread *thread)
 NachOSThread *
 Scheduler::FindNextToRun ()
 {
+    if(SchedType==4)
+    {
+        UpdatePriority();
+        //printf("Entered in ready to run\n");
+        List *tempList=new List;
+        while(!(readyList->IsEmpty()))
+        { 
+            NachOSThread* temp = (NachOSThread *)readyList->Remove();
+            tempList->Append((void*)temp);
+        }
+        // printf("Midway in ready to run\n");
+        //printf("temp list contents:\n");
+        // tempList->Mapcar((VoidFunctionPtr) ThreadPrint);
+        while(!(tempList->IsEmpty()))
+        {
+            NachOSThread* temp = (NachOSThread *)tempList->Remove();
+            readyList->SortedInsert((void*)temp,GetPriority(temp));   
+        }
+        //thread->UpdatePriority();
+        //readyList->SortedInsert((void*)thread,GetPriority(thread));
+        //printf("Exiting in ready to run\n");
+    }
     return (NachOSThread *)readyList->Remove();
+
 }
 
 //----------------------------------------------------------------------

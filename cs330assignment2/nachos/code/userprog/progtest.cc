@@ -37,7 +37,7 @@ StartProcess(char *filename)
     }
     space = new AddrSpace(executable);    
     currentThread->space = space;
-    currentThread->SetPriority(100);
+    SetPriority(100,currentThread->GetPID());
     delete executable;			// close file
 
     space->InitRegisters();		// set the initial register values
@@ -48,7 +48,7 @@ StartProcess(char *filename)
 					// the address space exits
 					// by doing the syscall "exit"
 }
-void StartProcessBatch( char *filename,int priority)
+void StartProcessBatch( char *filename,int p)
 {
     char *ch=new char[100];
     int i;
@@ -67,7 +67,8 @@ void StartProcessBatch( char *filename,int priority)
     child->space = space;
     child->ThreadStackAllocate(ForkStartFunctionNew, 0);
     delete executable;         
-    child->SetPriority(priority);
+    SetPriority(p,child->GetPID());
+    //priority[child->GetPID()]=basePriority[child->GetPID()]=50+p;
     child->InitializeRegisters() ;   
     child->space->RestoreState();      
     child->Schedule();

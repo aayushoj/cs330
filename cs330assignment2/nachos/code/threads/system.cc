@@ -26,6 +26,14 @@ unsigned thread_index;                  // Index into this array (also used to a
 bool initializedConsoleSemaphores;
 bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 
+int CPUsage[MAX_THREAD_COUNT];
+int CPUBurst[MAX_THREAD_COUNT];
+int Priority[MAX_THREAD_COUNT];
+int S[MAX_THREAD_COUNT];
+int basePriority[MAX_THREAD_COUNT];
+int sumBurst=0;
+int coBurst=0; 
+
 TimeSortedWaitQueue *sleepQueueHead;    // Needed to implement SC_Sleep
 
 #ifdef FILESYS_NEEDED
@@ -48,6 +56,21 @@ PostOffice *postOffice;
 extern void Cleanup();
 
 
+int GetPriority (NachOSThread* t) {return Priority[t->GetPID()];}
+int GetS(NachOSThread* t) {return S[t->GetPID()];}
+void SetPriority(int p,int pid){basePriority[pid]=p+BASE_PRIORITY;Priority[pid]=basePriority[pid];}
+
+void UpdatePriority()
+{
+    for(int i =0;i<thread_index;i++)
+    {
+        int pid=i;
+        CPUsage[pid]=CPUsage[pid]+CPUBurst[pid];
+        CPUBurst[pid]=0;
+        CPUsage[pid]=CPUsage[pid]/2;
+        Priority[pid]=basePriority[pid]+CPUsage[pid]/2;
+    }   
+}
 //----------------------------------------------------------------------
 // TimerInterruptHandler
 // 	Interrupt handler for the timer device.  The timer device is

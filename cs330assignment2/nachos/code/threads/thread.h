@@ -113,9 +113,9 @@ class NachOSThread {
 
     inline int GetPID (void) { return pid; }
     inline int GetPPID (void) { return ppid; }
-    inline int GetPriority (void) {return priority;}
-    int GetS(void) {return S;}
-    void SetPriority(int p){basePriority=p+BASE_PRIORITY;priority=basePriority;}
+    /*inline int GetPriority (void) {return priority[pid];}
+    int GetS(void) {return S[pid];}*/
+    //void SetPriority(int p){basePriority[pid]=p+BASE_PRIORITY;priority[pid]=basePriority[pid];}
 
     void SetChildExitCode (int childpid, int exitcode); // Called by an exiting child thread
 
@@ -139,7 +139,7 @@ class NachOSThread {
     void IncInstructionCount();
     unsigned GetInstructionCount();
      void InitializeRegisters();
-    void UpdatePriority();
+//    void UpdatePriority();
     void UpdateS();
   private:
     // some of the private data for this class is listed above
@@ -151,17 +151,17 @@ class NachOSThread {
     char* name;
 
     int pid, ppid;			// My pid and my parent's pid
-    int priority;
+    //int priority;
     int childpidArray[MAX_CHILD_COUNT]; // My children
     int childexitcode[MAX_CHILD_COUNT]; // Exit code of my children (return values for Join calls)
     bool exitedChild[MAX_CHILD_COUNT];  // Which children have exited?
     unsigned childcount;                // Count of children
     int initialTime;
     int waitchild_id;                   // Child I am waiting on (as a result of a Join call)
-    int S;
+    /*int S;
     int CPUBurst;
     int CPUsage;
-    int basePriority;
+    int basePriority;*/
     unsigned instructionCount;		// Keeps track of the instruction count executed by this thread
 
 #ifdef USER_PROGRAM
